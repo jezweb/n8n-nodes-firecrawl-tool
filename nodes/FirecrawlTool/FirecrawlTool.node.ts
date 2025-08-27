@@ -6,7 +6,7 @@ import {
 	INodeExecutionData,
 	IHttpRequestOptions,
 	NodeOperationError,
-	JsonObject,
+	NodeConnectionType,
 } from 'n8n-workflow';
 
 export class FirecrawlTool implements INodeType {
@@ -21,8 +21,8 @@ export class FirecrawlTool implements INodeType {
 		defaults: {
 			name: 'Firecrawl Tool',
 		},
-		inputs: ['main'],
-		outputs: ['main'],
+		inputs: [{type: NodeConnectionType.Main}],
+		outputs: [{type: NodeConnectionType.Main}],
 		credentials: [
 			{
 				name: 'firecrawlApi',
@@ -503,23 +503,23 @@ export class FirecrawlTool implements INodeType {
 
 				switch (operation) {
 					case 'scrape':
-						responseData = await this.handleScrape.call(this, i, apiHost, credentials.apiKey as string);
+						responseData = await handleScrape.call(this, i, apiHost, credentials.apiKey as string);
 						break;
 
 					case 'crawl':
-						responseData = await this.handleCrawl.call(this, i, apiHost, credentials.apiKey as string);
+						responseData = await handleCrawl.call(this, i, apiHost, credentials.apiKey as string);
 						break;
 
 					case 'map':
-						responseData = await this.handleMap.call(this, i, apiHost, credentials.apiKey as string);
+						responseData = await handleMap.call(this, i, apiHost, credentials.apiKey as string);
 						break;
 
 					case 'search':
-						responseData = await this.handleSearch.call(this, i, apiHost, credentials.apiKey as string);
+						responseData = await handleSearch.call(this, i, apiHost, credentials.apiKey as string);
 						break;
 
 					case 'extract':
-						responseData = await this.handleExtract.call(this, i, apiHost, credentials.apiKey as string);
+						responseData = await handleExtract.call(this, i, apiHost, credentials.apiKey as string);
 						break;
 
 					default:
@@ -537,7 +537,7 @@ export class FirecrawlTool implements INodeType {
 				if (this.continueOnFail()) {
 					returnData.push({
 						json: {
-							error: error.message,
+							error: error instanceof Error ? error.message : 'Unknown error',
 						},
 						pairedItem: { item: i },
 					});
@@ -549,14 +549,15 @@ export class FirecrawlTool implements INodeType {
 
 		return [returnData];
 	}
+}
 
-	// Scrape handler
-	private async handleScrape(
-		this: IExecuteFunctions,
-		itemIndex: number,
-		apiHost: string,
-		apiKey: string,
-	): Promise<IDataObject> {
+// Scrape handler
+async function handleScrape(
+	this: IExecuteFunctions,
+	itemIndex: number,
+	apiHost: string,
+	apiKey: string,
+): Promise<IDataObject> {
 		const url = this.getNodeParameter('url', itemIndex) as string;
 		const formats = this.getNodeParameter('formats', itemIndex) as string[];
 		const options = this.getNodeParameter('scrapeOptions', itemIndex) as IDataObject;
@@ -613,15 +614,15 @@ export class FirecrawlTool implements INodeType {
 
 		const response = await this.helpers.httpRequest(requestOptions);
 		return response.data || response;
-	}
+}
 
-	// Crawl handler
-	private async handleCrawl(
-		this: IExecuteFunctions,
-		itemIndex: number,
-		apiHost: string,
-		apiKey: string,
-	): Promise<IDataObject> {
+// Crawl handler
+async function handleCrawl(
+	this: IExecuteFunctions,
+	itemIndex: number,
+	apiHost: string,
+	apiKey: string,
+): Promise<IDataObject> {
 		const url = this.getNodeParameter('crawlUrl', itemIndex) as string;
 		const options = this.getNodeParameter('crawlOptions', itemIndex) as IDataObject;
 
@@ -699,15 +700,15 @@ export class FirecrawlTool implements INodeType {
 			this.getNode(),
 			'Crawl job timed out after 5 minutes',
 		);
-	}
+}
 
-	// Map handler
-	private async handleMap(
-		this: IExecuteFunctions,
-		itemIndex: number,
-		apiHost: string,
-		apiKey: string,
-	): Promise<IDataObject> {
+// Map handler
+async function handleMap(
+	this: IExecuteFunctions,
+	itemIndex: number,
+	apiHost: string,
+	apiKey: string,
+): Promise<IDataObject> {
 		const url = this.getNodeParameter('mapUrl', itemIndex) as string;
 		const options = this.getNodeParameter('mapOptions', itemIndex) as IDataObject;
 
@@ -732,15 +733,15 @@ export class FirecrawlTool implements INodeType {
 
 		const response = await this.helpers.httpRequest(requestOptions);
 		return response;
-	}
+}
 
-	// Search handler
-	private async handleSearch(
-		this: IExecuteFunctions,
-		itemIndex: number,
-		apiHost: string,
-		apiKey: string,
-	): Promise<IDataObject> {
+// Search handler
+async function handleSearch(
+	this: IExecuteFunctions,
+	itemIndex: number,
+	apiHost: string,
+	apiKey: string,
+): Promise<IDataObject> {
 		const query = this.getNodeParameter('searchQuery', itemIndex) as string;
 		const options = this.getNodeParameter('searchOptions', itemIndex) as IDataObject;
 
@@ -773,15 +774,15 @@ export class FirecrawlTool implements INodeType {
 
 		const response = await this.helpers.httpRequest(requestOptions);
 		return response.data || response;
-	}
+}
 
-	// Extract handler
-	private async handleExtract(
-		this: IExecuteFunctions,
-		itemIndex: number,
-		apiHost: string,
-		apiKey: string,
-	): Promise<IDataObject> {
+// Extract handler
+async function handleExtract(
+	this: IExecuteFunctions,
+	itemIndex: number,
+	apiHost: string,
+	apiKey: string,
+): Promise<IDataObject> {
 		const urlsString = this.getNodeParameter('extractUrls', itemIndex) as string;
 		const prompt = this.getNodeParameter('extractPrompt', itemIndex) as string;
 		const options = this.getNodeParameter('extractOptions', itemIndex) as IDataObject;
@@ -819,5 +820,4 @@ export class FirecrawlTool implements INodeType {
 
 		const response = await this.helpers.httpRequest(requestOptions);
 		return response.data || response;
-	}
 }

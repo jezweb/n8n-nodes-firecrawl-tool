@@ -57,7 +57,7 @@
     "typescript": "^5.3.0"
   },
   "dependencies": {
-    "@mendable/firecrawl-js": "^2.0.0"
+    "@mendable/firecrawl-js": "^3.2.1"
   },
   "peerDependencies": {
     "n8n-workflow": "*"
