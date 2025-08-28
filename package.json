@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-firecrawl-tool",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "n8n node for Firecrawl v2 API - Web scraping, crawling, and data extraction tool for workflows and AI agents",
   "keywords": [
     "n8n-community-node-package",
